@@ -13,7 +13,7 @@ class Content < ActiveRecord::Base
 
   # /!\ No scope here /!\
 
-  delegate :score, :user, :to => :node
+  delegate :score, :user, :set_on_ppp, :on_ppp?, :to => :node
 
   class << self; attr_accessor :type; end
 
@@ -77,7 +77,7 @@ class Content < ActiveRecord::Base
 ### Workflow ###
 
   def mark_as_deleted
-    node.update_attribute(:public, false)
+    node.update_column(:public, false)
   end
 
   def visible?

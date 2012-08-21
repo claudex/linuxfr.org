@@ -16,23 +16,17 @@ $PX_MARGE_GAUCHE: 31px;
 $PX_MARGE_DROITE: 19px;
 $PX_TOP: 16px;
 $PX_BANDEAU: 7px;
-$PX_BRANDING_TOP: 34px;
 $PX_BRANDING_LARG: 201px;
-$PX_SHADOW: 12px;
-$PX_SITE_MARGE_TOP: 40px;
+$PX_BRANDING_HEIGHT: 186px;
 $PX_SITE_PAD_DROIT: 42px;
 $PX_CONT_TOP: 34px;
 
 $PX_MARGE_GAUCHE_SHA: 50px;
 $PX_MARGE_DROITE_SHA: 38px;
-/* pas de px ici pour faire plaisir a webkit */
-$PX_SEP_FOND: 134px;
-$PX_SEP_FOND_webkit: 134;
 $PX_PAD_NODE: 34px;
 
 $RAY_SIDEBAR: 42px;
 $RAY_CONTAINER: 62px;
-$RAY_CONTAINER_PLUS_1: 63px;
 $RAY_FOOT: 7px;
 $RAY_NODE: 6px;
 
@@ -98,6 +92,7 @@ a {
 }
 
 .button_to { display: inline-block; }
+button { padding-top: 2px; padding-bottom: 2px; }
 
 button,
 .edit_client_app a,
@@ -123,8 +118,13 @@ input[type='submit'] {
   }
 }
 
+#comments #follow-feed,
+#comments #send-comment {
+  display: inline-block;
+}
+
 form input[type='submit'], button {
-  display: block;
+  display: inline-block;
   padding-left: 20px;
   background: url("/images/icones/check.png") no-repeat 3px 3px $C_CLAIR;
   cursor: pointer;
@@ -137,7 +137,7 @@ form input[type='submit'], button {
   float: left;
   height: 21px;
   padding: 0 3px 0 20px;
-  margin-right: 10px;
+  margin: 0 12px;
   background: url("/images/icones/loop.png") no-repeat 2px 2px $C_CLAIR;
   &:hover { background-color: $C_FONCE; }
 }
@@ -161,7 +161,7 @@ button, input[type='submit'] {
   }
   &.submit_news {
     background: url("/images/icones/check_alt.png") no-repeat 2px 2px $C_CLAIR;
-    margin-bottom: 15px;
+    margin: 0 15px 15px;
   }
   &.add_para, &.add_link, &.create_news {
     background: url("/images/icones/plus.png") no-repeat 2px 2px $C_CLAIR;
@@ -220,22 +220,13 @@ button, input[type='submit'] {
 
 #sidebar {
   float: left;
-  margin-top: $PX_BRANDING_TOP;
   left: $PX_MARGE_GAUCHE_SHA;
   width: $PX_BRANDING_LARG;
   text-align: left;
   font-size: small;
   background: $C_CLAIR;
 
-
-  -moz-border-radius-bottomright: $RAY_SIDEBAR;
-  -webkit-border-bottom-right-radius: $RAY_SIDEBAR;
-  -khtml-border-bottom-right-radius: $RAY_SIDEBAR;
-  border-bottom-right-radius: $RAY_SIDEBAR;
-
-  a {
-    font-weight: inherit;
-  }
+  a { font-weight: inherit; }
 
   /* le cadenas */
   .insecure, .secure {
@@ -256,7 +247,7 @@ button, input[type='submit'] {
   /* image DLFP */
   #branding h1 {
     display: block;
-    height: 186px;
+    height: $PX_BRANDING_HEIGHT;
 
     a {
       display: block;
@@ -299,7 +290,7 @@ button, input[type='submit'] {
     }
 
     /* rotation du titre de la boîte */
-    h1:first-of-type {
+    h1 {
       display: inline-block;
       text-align: center;
       font-size: small;
@@ -325,6 +316,11 @@ button, input[type='submit'] {
       &:before { content: " ["; }
       &:after  { content: "] "; }
     }
+
+    .abusers li {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   #logout {
@@ -343,9 +339,6 @@ button, input[type='submit'] {
 
 /* menu du haut */
 #site {
-  position: absolute;
-  top: $PX_SITE_MARGE_TOP;
-  right: $PX_MARGE_DROITE_SHA;
   display: block;
   text-align: right;
   text-transform: uppercase;
@@ -354,7 +347,7 @@ button, input[type='submit'] {
 
   ul {
     display: inline;
-    padding-right: $PX_SITE_PAD_DROIT;
+    padding-left: 0;
   }
   li {
     display: inline;
@@ -366,6 +359,10 @@ button, input[type='submit'] {
 
   /* boite de recherche */
   form {
+    display: inline-block;
+    vertical-align: middle;
+    width: 160px;
+
     label {
       float: left;
       text-indent: -9998em;
@@ -377,6 +374,8 @@ button, input[type='submit'] {
       display: block;
       float: left;
       background: $C_CLAIR;
+      margin-top: 2px;
+      width: 125px;
     }
     input#search_submit {
       background: url('/images/contrib/kaiska/search.png') no-repeat;
@@ -386,31 +385,16 @@ button, input[type='submit'] {
       height: 22px;
       cursor: pointer;
     }
-    display: block;
-    background: $C_INTER;
-    padding-left: $PX_SITE_PAD_DROIT;
-    padding-right: 0;
-    width: 220px;
-    margin-left: auto;
-    margin-right: 0;
-
-    -moz-border-radius-bottomleft: $RAY_SIDEBAR;
-    -webkit-border-bottom-left-radius: $RAY_SIDEBAR;
-    -khtml-border-bottom-left-radius: $RAY_SIDEBAR;
-    border-bottom-left-radius: $RAY_SIDEBAR;
-
-    height: 29px;
-    line-height: 29px;
-    text-align: center;
   }
 }
 
 /* pied de page derniers commentaires, … */
 #bigfooter{
+  display: block;
   clear: both;
   width: 100%;
-  display: block;
   margin-top: 0;
+  padding: 0 0 20px 0;
   background: $C_CLAIR;
   background: -moz-linear-gradient(top,
     $C_FOOT 0%,
@@ -436,7 +420,6 @@ button, input[type='submit'] {
     $C_FOOT 0%,
     white 100%
   );
-  padding: 0;
 
   a { font-size: small; }
 
@@ -476,13 +459,7 @@ button, input[type='submit'] {
     );
     min-height: 330px;
 
-    -moz-border-radius-bottomright: $RAY_FOOT;
-    -webkit-border-bottom-right-radius: $RAY_FOOT;
-    -khtml-border-bottom-right-radius: $RAY_FOOT;
     border-bottom-right-radius: $RAY_FOOT;
-    -moz-border-radius-bottomleft: $RAY_FOOT;
-    -webkit-border-bottom-left-radius: $RAY_FOOT;
-    -khtml-border-bottom-left-radius: $RAY_FOOT;
     border-bottom-left-radius: $RAY_FOOT;
 
     h1 {
@@ -497,14 +474,7 @@ button, input[type='submit'] {
   display: block;
   margin-left: $PX_BRANDING_LARG;
   background: $C_CONTAINER;
-  -moz-border-radius-topleft: $RAY_CONTAINER;
-  -webkit-border-top-left-radius: $RAY_CONTAINER;
-  -khtml-border-top-left-radius: $RAY_CONTAINER;
-  border-top-left-radius: $RAY_CONTAINER;
-
-  padding: 40px $RAY_CONTAINER 10px 40px;
-  margin-top: $PX_CONT_TOP;
-  margin-bottom: 0;
+  padding: 30px $RAY_CONTAINER 10px 40px;
 
   /* le titre de la page est déjà contenu dans la barre du navigateur, l'url du navigateur, ... */
   > h1:first-of-type {
@@ -515,7 +485,7 @@ button, input[type='submit'] {
 /* article titre */
 #phare article {
   /* enleve la liste des liens de la boite d'en-tete pour ne garder que le contenu "texte" de l'article, pour gain de place. */
-  .content ul {
+  .content ul.links {
     display: none;
   }
 
@@ -603,6 +573,10 @@ article {
     min-height: 70px;
     line-height: 1.4em;
 
+    &.hidden {
+      padding: 0;
+      min-height: 0;
+    }
     > p:first-child {
       margin-top: 0;
     }
@@ -805,6 +779,7 @@ footer.actions {
       background-color: transparent;
     }
   }
+  &.done { display: none; }
 }
 
 /* concerne tout ce qui est contenu : article, commentaire */
@@ -815,7 +790,7 @@ footer.actions {
     margin: 0 auto;
     max-width: 100%;
   }
-  a[href] {
+  a {
     @include lien_standard;
     &[title="Définition Wikipédia"]:after {
       content: "\A0W";
@@ -1005,7 +980,7 @@ li.comment {
     margin-bottom: 5px;
   }
   .deleted {
-    border-left: 2px solid red;
+    border-left: 3px solid red;
     font-style: italic;
   }
   > ul {
@@ -1269,6 +1244,7 @@ body#news-show #redaction {
   float: left;
   width: 60%;
   .paragraph { margin-bottom: 15px; }
+  textarea { width: 100%; }
 }
 #redaction .edition_in_place, #redaction .paragraph, #redaction .link {
   padding-left: 30px;
@@ -1299,23 +1275,7 @@ body#news-show #redaction {
   float: right;
   width: 38%;
 
-  .inbox {
-    p {
-      margin: 2px 0;
-    }
-    p.edition, p.locking {
-      &:before {
-        content: "Δ ";
-        color: orange;
-      }
-    }
-    p.creation {
-      &:before {
-        content: "+ ";
-        color: lime;
-      }
-    }
-  }
+  .inbox p { margin: 2px 0; }
 }
 #news_board .board #board_message {
   width: 95%;
@@ -1468,6 +1428,114 @@ img {
 .markItUpEditor {
   background:none;
   border: 1px solid $C_INTER;
+}
+
+.markdown_cheatsheet img.markdown {
+  float: left;
+  margin: 12px 25px 0 0;
+}
+
+@media screen and (max-width: 768px), handheld {
+  html, body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #fff;
+  }
+
+  #top { display: none; }
+  #site { margin: 10px 5px; }
+
+  #sidebar {
+    background: #fff;
+    width: 100%;
+    #branding {
+      float: right;
+      width: $PX_BRANDING_LARG;
+      margin-right: 35px;
+    }
+    .box {
+      min-height: 0;
+      border-bottom: 0;
+      &:last-child { padding-bottom: 0; }
+      h1 {
+        -webkit-transform: none;
+        -khtml-transform: none;
+        -moz-transform: none;
+        -o-transform: none;
+        transform: none;
+        width: 100px;
+        margin: 0 10px;
+      }
+      ul { margin: 5px; }
+    }
+    .box p, .box .new_content, #poll_box, #redaction_box ul, #moderation_box ul, #admin_box { display: none; }
+    #moderation_box {
+      .inbox {
+        p { display: block; }
+        p + p + p + p { display: none; }
+      }
+      .board input#board_message {
+        float: left;
+        width: 50%;
+        margin: 2px 0 0 8px;
+      }
+    }
+    #new_account_sidebar {
+      p { display: block; margin: 5px 10px; }
+      input[type="text"], input[type="password"] { width: 120px; }
+    }
+  }
+
+  #container {
+    clear: left;
+    margin: 0;
+    padding: 10px;
+    .score, .datePourCss { right: 0 !important; }
+    header {
+      h1 { margin-right: 48px; }
+      time, .tags { display: none; }
+    }
+    .tag_in_place { display: none; }
+    article, ul.threads > li.comment { padding: 10px 15px; }
+  }
+
+  #bigfooter {
+    #last_comments, #popular_tags { display: none; }
+    #friends, #about_us { width: 48%; min-height: 300px; }
+  }
+
+  li.comment > ul { margin-left: 0.25em; }
+  img.avatar { width: 50px; height: 50px; }
+
+  div#toolbar {
+    left: 20px;
+    right: 20px;
+    font-size: small;
+    .prev, .next { font-size: xx-large; }
+  }
+  #toolbar_alt_items { display: none; }
+}
+
+@media screen and (max-width: 400px), handheld {
+  #sidebar #branding {
+    width: $PX_BRANDING_LARG / 2;
+    margin-right: 10px;
+    h1 {
+      height: $PX_BRANDING_HEIGHT / 2;
+      background-size: 100%;
+    }
+  }
+
+  #bigfooter {
+    #friends { display: none; }
+    #about_us { width: 100%; margin: 0; min-height: 240px; }
+  }
+}
+
+@media screen and (max-width: 300px) {
+  img.avatar { display: none; }
+  #toolbar { display: none; }
 }
 
 /* Use all the width for the news edit form */

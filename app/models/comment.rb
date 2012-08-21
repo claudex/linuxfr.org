@@ -3,13 +3,13 @@
 #
 # Table name: comments
 #
-#  id                :integer(4)      not null, primary key
-#  node_id           :integer(4)
-#  user_id           :integer(4)
-#  state             :string(10)      default("published"), not null
-#  title             :string(160)     not null
-#  score             :integer(4)      default(0), not null
-#  answered_to_self  :boolean(1)      default(FALSE), not null
+#  id                :integer          not null, primary key
+#  node_id           :integer
+#  user_id           :integer
+#  state             :string(10)       default("published"), not null
+#  title             :string(160)      not null
+#  score             :integer          default(0), not null
+#  answered_to_self  :boolean          default(FALSE), not null
 #  materialized_path :string(1022)
 #  body              :text
 #  wiki_body         :text
@@ -107,6 +107,23 @@ class Comment < ActiveRecord::Base
             exists?
   end
 
+  def parents
+    Comment.where(:node_id => node_id).
+            where("LOCATE(materialized_path, ?) = 1", materialized_path).
+            where("id != ?", self.id)
+  end
+
+### Notifications ###
+
+  after_create :notify_parents
+  def notify_parents
+    parents.each do |p|
+      next if p.user_id == user_id
+      account = p.user.try(:account)
+      account.notify_answer_on node_id if account
+    end
+  end
+
 ### Calculations ###
 
   before_validation :default_score, :on => :create
@@ -155,7 +172,7 @@ class Comment < ActiveRecord::Base
 ### Votes ###
 
   def vote_by?(account_id)
-    $redis.exists("comments/#{self.id}/votes/#{account_id}")
+    $redis.get("comments/#{self.id}/votes/#{account_id}")
   end
 
   def vote_for(account)
@@ -168,7 +185,7 @@ class Comment < ActiveRecord::Base
 
   def vote(account, value)
     key = "comments/#{self.id}/votes/#{account.id}"
-    return false if $redis.getset(key , value)
+    return false if $redis.getset(key, value)
     $redis.expire(key, 7776000) # 3 months
     unless score * (score + value) > 100  # Score is out of the [-10, 10] bounds
       $redis.incrby("users/#{self.user_id}/diff_karma", value)

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120718221412) do
+ActiveRecord::Schema.define(:version => 20120729231333) do
 
   create_table "access_grants", :force => true do |t|
     t.integer  "account_id"
@@ -52,6 +52,7 @@ ActiveRecord::Schema.define(:version => 20120718221412) do
     t.datetime "reset_password_sent_at"
     t.integer  "min_karma",                             :default => 20
     t.integer  "max_karma",                             :default => 20
+    t.string   "uploaded_stylesheet"
   end
 
   add_index "accounts", ["confirmation_token"], :name => "index_accounts_on_confirmation_token", :unique => true
@@ -254,11 +255,13 @@ ActiveRecord::Schema.define(:version => 20120718221412) do
   add_index "poll_answers", ["poll_id", "position"], :name => "index_poll_answers_on_poll_id_and_position"
 
   create_table "polls", :force => true do |t|
-    t.string   "state",       :limit => 10,  :default => "draft", :null => false
-    t.string   "title",       :limit => 128,                      :null => false
-    t.string   "cached_slug", :limit => 128
+    t.string   "state",             :limit => 10,  :default => "draft", :null => false
+    t.string   "title",             :limit => 128,                      :null => false
+    t.string   "cached_slug",       :limit => 128
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "wiki_explanations"
+    t.text     "explanations"
   end
 
   add_index "polls", ["cached_slug"], :name => "index_polls_on_cached_slug"

@@ -1,23 +1,23 @@
 # encoding: UTF-8
-#
 # == Schema Information
 #
 # Table name: news
 #
-#  id           :integer(4)      not null, primary key
-#  state        :string(10)      default("draft"), not null
-#  title        :string(160)     not null
+#  id           :integer          not null, primary key
+#  state        :string(10)       default("draft"), not null
+#  title        :string(160)      not null
 #  cached_slug  :string(165)
-#  moderator_id :integer(4)
-#  section_id   :integer(4)
-#  author_name  :string(32)      not null
-#  author_email :string(64)      not null
+#  moderator_id :integer
+#  section_id   :integer
+#  author_name  :string(32)       not null
+#  author_email :string(64)       not null
 #  body         :text
 #  second_part  :text(2147483647)
 #  created_at   :datetime
 #  updated_at   :datetime
 #
 
+#
 # The news are the first content in LinuxFr.org.
 # Anonymous and authenticated users can submit a news
 # that will be reviewed and moderated by the LinuxFr.org team.
@@ -30,10 +30,8 @@ class News < Content
   belongs_to :moderator, :class_name => "User"
   has_many :links, :dependent => :destroy, :inverse_of => :news
   has_many :paragraphs, :dependent => :destroy, :inverse_of => :news
-  accepts_nested_attributes_for :links, :allow_destroy => true,
-    :reject_if => proc { |attrs| attrs['title'].blank? && attrs['url'].blank? }
-  accepts_nested_attributes_for :paragraphs, :allow_destroy => true,
-    :reject_if => proc { |attrs| attrs['body'].blank? }
+  accepts_nested_attributes_for :links, :allow_destroy => true
+  accepts_nested_attributes_for :paragraphs, :allow_destroy => true
   has_many :versions, :class_name => 'NewsVersion',
                       :dependent  => :destroy,
                       :order      => 'version DESC',
@@ -138,6 +136,13 @@ class News < Content
   attr_accessor   :message, :wiki_body, :wiki_second_part, :editor, :pot_de_miel
   attr_accessible :message, :wiki_body, :wiki_second_part
 
+  before_validation :mark_links_for_destruction
+  def mark_links_for_destruction
+    links.each do |link|
+      link.mark_for_destruction if link.url.blank?
+    end
+  end
+
   # The body of a news (first and second parts) is duplicated:
   # one copy is in the news object itself, the other is shared by several paragraphs.
   #
@@ -172,6 +177,15 @@ class News < Content
   def create_parts
     paragraphs.create(:second_part => false, :wiki_body => wiki_body)        unless wiki_body.blank?
     paragraphs.create(:second_part => true,  :wiki_body => wiki_second_part) unless wiki_second_part.blank?
+  end
+
+  def second_part_toc
+    self.wiki_second_part ||= paragraphs.in_second_part.map(&:wiki_body).join("\n\n")
+    toc_for wiki_second_part
+  end
+
+  def announce_toc
+    Push.create(self, :kind => :second_part_toc, :toc => second_part_toc)
   end
 
   after_create :announce_message, :unless => Proc.new { |news| news.message.blank? }
@@ -346,21 +360,6 @@ class News < Content
   def locker
     locker_id = $redis.get lock_key
     User.find(locker_id).name if locker_id
-  end
-
-### PPP ###
-
-  def self.ppp
-    id = $redis.get("news/ppp")
-    id && find(id)
-  end
-
-  def set_on_ppp
-    $redis.set("news/ppp", self.id)
-  end
-
-  def on_ppp?
-    self.id == $redis.get("news/ppp").to_i
   end
 
 end

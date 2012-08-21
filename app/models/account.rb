@@ -1,36 +1,36 @@
 # encoding: UTF-8
-#
 # == Schema Information
 #
 # Table name: accounts
 #
-#  id                   :integer(4)      not null, primary key
-#  user_id              :integer(4)
-#  login                :string(40)      not null
-#  role                 :string(10)      default("visitor"), not null
-#  karma                :integer(4)      default(20), not null
-#  min_karma            :integer(4)      default(20)
-#  max_karma            :integer(4)      default(20)
-#  nb_votes             :integer(4)      default(0), not null
-#  stylesheet           :string(255)
-#  email                :string(255)     default(""), not null
-#  encrypted_password   :string(128)     default(""), not null
-#  confirmation_token   :string(255)
-#  confirmed_at         :datetime
-#  confirmation_sent_at :datetime
-#  reset_password_token :string(255)
-#  remember_token       :string(255)
-#  remember_created_at  :datetime
-#  sign_in_count        :integer(4)      default(0)
-#  current_sign_in_at   :datetime
-#  last_sign_in_at      :datetime
-#  current_sign_in_ip   :string(255)
-#  last_sign_in_ip      :string(255)
-#  created_at           :datetime
-#  updated_at           :datetime
-#  preferences          :integer(4)      default(0), not null
+#  id                     :integer          not null, primary key
+#  user_id                :integer
+#  login                  :string(40)       not null
+#  role                   :string(10)       default("visitor"), not null
+#  karma                  :integer          default(20), not null
+#  nb_votes               :integer          default(0), not null
+#  stylesheet             :string(255)
+#  email                  :string(255)      default(""), not null
+#  encrypted_password     :string(128)      default(""), not null
+#  confirmation_token     :string(255)
+#  confirmed_at           :datetime
+#  confirmation_sent_at   :datetime
+#  reset_password_token   :string(255)
+#  remember_created_at    :datetime
+#  sign_in_count          :integer          default(0)
+#  current_sign_in_at     :datetime
+#  last_sign_in_at        :datetime
+#  current_sign_in_ip     :string(255)
+#  last_sign_in_ip        :string(255)
+#  created_at             :datetime
+#  updated_at             :datetime
+#  preferences            :integer          default(0), not null
+#  reset_password_sent_at :datetime
+#  min_karma              :integer          default(20)
+#  max_karma              :integer          default(20)
 #
 
+#
 # The accounts are the private informations about users.
 # A user wth an account can login, change its password
 # and do many other things on the site.
@@ -52,8 +52,10 @@ class Account < ActiveRecord::Base
   belongs_to :user, :inverse_of => :account
   accepts_nested_attributes_for :user, :reject_if => :all_blank
 
+  mount_uploader :uploaded_stylesheet, StylesheetUploader
+
   attr_accessor :remember_me
-  attr_accessible :login, :email, :stylesheet, :password, :password_confirmation, :user_attributes, :remember_me
+  attr_accessible :login, :email, :stylesheet, :uploaded_stylesheet, :password, :password_confirmation, :user_attributes, :remember_me
   delegate :name, :to => :user
 
   scope :unconfirmed, where(:confirmed_at => nil)
@@ -165,6 +167,10 @@ class Account < ActiveRecord::Base
 
 ### Actions ###
 
+  def viewable_by?(account)
+    account && (account.admin? || account.moderator? || account.id == self.id)
+  end
+
   def can_post_on_board?
     active_for_authentication? && !plonked? && karma > 0
   end
@@ -175,10 +181,24 @@ class Account < ActiveRecord::Base
 
   def read(node)
     node.read_by(self.id)
+    $redis.srem "dashboard/#{self.id}", node.id
   end
 
-  def viewable_by?(account)
-    account && (account.admin? || account.moderator? || account.id == self.id)
+  def notify_answer_on(node_id)
+    $redis.sadd "dashboard/#{self.id}", node_id
+    $redis.expire "dashboard/#{self.id}", 86400 * 7  # one week
+  end
+
+  def has_answers?
+    $redis.scard("dashboard/#{self.id}").to_i > 0
+  end
+
+  def answers_node_id
+    $redis.smembers "dashboard/#{self.id}"
+  end
+
+  def reset_answers_notifications
+    $redis.del "dashboard/#{self.id}"
   end
 
 ### Karma ###
@@ -267,5 +287,13 @@ class Account < ActiveRecord::Base
     return if stylesheet.starts_with?("https://")
     return if Stylesheet.include?(stylesheet)
     errors.add(:stylesheet, "Feuille de style non valide")
+  end
+
+  def stylesheet_url
+    case
+    when uploaded_stylesheet.present? then uploaded_stylesheet.url
+    when stylesheet.present?          then stylesheet
+    else 'application'
+    end
   end
 end

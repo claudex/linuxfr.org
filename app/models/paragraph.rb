@@ -1,17 +1,17 @@
 # encoding: UTF-8
-#
 # == Schema Information
 #
 # Table name: paragraphs
 #
-#  id          :integer(4)      not null, primary key
-#  news_id     :integer(4)      not null
-#  position    :integer(4)
-#  second_part :boolean(1)
+#  id          :integer          not null, primary key
+#  news_id     :integer          not null
+#  position    :integer
+#  second_part :boolean
 #  body        :text
 #  wiki_body   :text
 #
 
+#
 # A paragraph is a block of text from a news, with wiki syntax.
 # The paragraph never modifies the body (or wiki_body) of a news,
 # only the news known its state and when to do the synchronization!
@@ -106,16 +106,19 @@ class Paragraph < ActiveRecord::Base
   after_create :announce_create
   def announce_create
     Push.create(news, :id => self.id, :kind => :add_paragraph, :body => body, :after => after, :part => part)
+    news.announce_toc
   end
 
   after_update :announce_update
   def announce_update
     Push.create(news, :id => self.id, :kind => :update_paragraph, :body => body)
+    news.announce_toc
   end
 
   before_destroy :announce_destroy
   def announce_destroy
     Push.create(news, :id => self.id, :kind => :remove_paragraph)
+    news.announce_toc
   end
 
   # Warning, acts_as_list also declares a before_destroy callback,

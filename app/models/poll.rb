@@ -3,12 +3,14 @@
 #
 # Table name: polls
 #
-#  id          :integer(4)      not null, primary key
-#  state       :string(10)      default("draft"), not null
-#  title       :string(128)     not null
-#  cached_slug :string(128)
-#  created_at  :datetime
-#  updated_at  :datetime
+#  id                :integer          not null, primary key
+#  state             :string(10)       default("draft"), not null
+#  title             :string(128)      not null
+#  cached_slug       :string(128)
+#  created_at        :datetime
+#  updated_at        :datetime
+#  wiki_explanations :text
+#  explanations      :text
 #
 
 class Poll < Content
@@ -19,16 +21,24 @@ class Poll < Content
                      :dependent  => :destroy,
                      :order      => 'position',
                      :inverse_of => :poll
-  accepts_nested_attributes_for :answers, :allow_destroy => true, :reject_if => :all_blank
+  accepts_nested_attributes_for :answers, :allow_destroy => true
 
-  attr_accessible :title, :answers_attributes
-  sanitize_attr :title
+  attr_accessible :title, :wiki_explanations, :answers_attributes
 
   validates :title, :presence => { :message => "La question est obligatoire" }
+
+  wikify_attr :explanations
 
   scope :draft,     where(:state => "draft")
   scope :published, where(:state => "published")
   scope :archived,  where(:state => "archived")
+
+  before_validation :mark_answers_for_destruction
+  def mark_answers_for_destruction
+    answers.each do |answer|
+      answer.mark_for_destruction if answer.answer.blank?
+    end
+  end
 
 ### Associated node ###
 
@@ -45,10 +55,11 @@ class Poll < Content
 ### Search ####
 
   mapping do
-    indexes :id,         :index    => :not_analyzed
-    indexes :created_at, :type => 'date', :include_in_all => false
-    indexes :title,      :analyzer => 'french',  :boost => 10
-    indexes :answers,    :analyzer => 'french', :as => proc { answers.pluck(:answer).join("\n") }
+    indexes :id,           :index    => :not_analyzed
+    indexes :created_at,   :type => 'date', :include_in_all => false
+    indexes :title,        :analyzer => 'french', :boost => 10
+    indexes :explanations, :analyzer => 'french', :boost => 5
+    indexes :answers,      :analyzer => 'french', :as => proc { answers.pluck(:answer).join("\n") }
   end
 
 ### Workflow ###

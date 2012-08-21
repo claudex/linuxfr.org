@@ -54,6 +54,7 @@ LinuxfrOrg::Application.routes.draw do
 
   # Nodes
   get "/tableau-de-bord" => "dashboard#index", :as => :dashboard
+  get "/tableau-de-bord/reponses" => "dashboard#answers"
   get "/comments/:id(,:d)(.html)" => "comments#templeet"
   resources :nodes, :only => [] do
     resources :comments do
@@ -95,7 +96,7 @@ LinuxfrOrg::Application.routes.draw do
     :sign_up  => "inscription",
     :unlock   => "debloquage"
   }
-  resource :stylesheet, :only => [:edit, :create, :destroy]
+  resource :stylesheet, :only => [:create, :edit, :update, :destroy]
 
   # OAuth
   namespace :auth do
@@ -144,6 +145,7 @@ LinuxfrOrg::Application.routes.draw do
       member do
         post :refuse
         post :accept
+        post :ppp
       end
     end
     resources :plonk, :only => [:create]
