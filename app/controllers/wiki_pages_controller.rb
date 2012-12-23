@@ -10,7 +10,7 @@ class WikiPagesController < ApplicationController
   def index
     respond_to do |wants|
       wants.html { redirect_to WikiPage.home_page }
-      wants.atom { @wiki_pages = WikiPage.sorted }
+      wants.atom { @wiki_pages = Node.public_listing(WikiPage, "created_at").map(&:content) }
     end
   end
 
@@ -35,7 +35,7 @@ class WikiPagesController < ApplicationController
 
   def create
     @wiki_page = WikiPage.new
-    @wiki_page.title = params[:wiki_page][:title]
+    @wiki_page.title = params[:wiki_page].delete(:title)
     @wiki_page.user_id = current_account.user_id
     @wiki_page.attributes = params[:wiki_page]
     enforce_create_permission(@wiki_page)

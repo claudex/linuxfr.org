@@ -1,6 +1,6 @@
 source :rubygems
 
-gem "rails",                   "~>3.2.8"
+gem "rails",                   "~>3.2.9"
 
 gem "acts_as_list",            "~>0.1.6"
 gem "albino",                  "~>1.3"
@@ -37,6 +37,7 @@ group :assets do
   gem "jquery-rails",          "~>1.0"
   gem "sass-rails",            "~>3.2"
   gem "coffee-rails",          "~>3.2"
+  gem "libv8",                 "~>3.11"
   gem "therubyracer",          "~>0.9", :require => 'v8'
   gem "uglifier"
 end
@@ -49,8 +50,9 @@ end
 group :development do
   gem "annotate"
   gem "autotest-standalone"
+  gem "better_errors"
   gem "capistrano"
-  gem "capistrano_colors"
+  gem "capistrano-maintenance"
   gem "haml-rails"
   gem "letter_opener"
   gem "mo"
