@@ -107,6 +107,9 @@ class News < Content
     author_account.try(:give_karma, 50)
     Push.create(self, :kind => :publish, :username => moderator.name)
     $redis.publish "news", {:id => self.id, :title => title, :slug => cached_slug}.to_json
+    if diary_id = $redis.get("convert/#{self.id}")
+      Diary.find(diary_id).update_column(:converted_news_id, self.id)
+    end
   end
 
   def be_refused
@@ -214,7 +217,13 @@ class News < Content
     User.joins(:news_versions).
          where("news_versions.news_id" => self.id).
          group("users.id").
-         select("users.*")
+         select("users.*, COUNT(news_versions.id) AS nb_editions").
+         order("nb_editions DESC")
+  end
+
+  def edited_by
+    attendees.where("users.id != ?", self.node.user_id).
+              select([:name, :cached_slug])
   end
 
 ### Associated node ###
@@ -227,6 +236,15 @@ class News < Content
     self.tmp_owner_id = author_account.try(:user_id)
     attrs[:public] = false
     super attrs
+  end
+
+  def reassign_to(user_id)
+    user = User.find(user_id)
+    return unless user
+    node.update_column(:user_id, user.id)
+    self.author_name  = user.name
+    self.author_email = user.account.try(:email)
+    save
   end
 
 ### Moderators' votes ###
@@ -287,7 +305,7 @@ class News < Content
   end
 
   def taggable_by?(account)
-    super(account) || (account.amr? && candidate?)
+    super(account) || account.amr?
   end
 
   def acceptable_by?(account)
@@ -298,11 +316,15 @@ class News < Content
     account.admin? || (account.moderator? && refusable?)
   end
 
-  def resetable_by?(account)
-    account.admin?
+  def rewritable_by?(account)
+    refusable_by? account
   end
 
-  def rewritable_by?(account)
+  def reassignable_by?(account)
+    account.moderator? || account.admin?
+  end
+
+  def resetable_by?(account)
     account.admin?
   end
 

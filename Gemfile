@@ -1,6 +1,6 @@
-source :rubygems
+source 'https://rubygems.org'
 
-gem "rails",                   "~>3.2.9"
+gem "rails",                   "~>3.2.13"
 
 gem "acts_as_list",            "~>0.1.6"
 gem "albino",                  "~>1.3"
@@ -8,7 +8,7 @@ gem "bitfields",               "~>0.4"
 gem "canable",                 "~>0.1"
 gem "carrierwave",             "~>0.6"
 gem "devise",                  "~>2.0"
-gem "differ",                  "~>0.1"
+gem "diff_match_patch", github: "nono/diff_match_patch-ruby", require: "diff_match_patch"
 gem "french_rails",            "~>0.2"
 gem "friendly_id",             "~>4.0"
 gem "haml",                    "~>3.1"
@@ -72,6 +72,6 @@ group :test do
 end
 
 group :production do
-  gem "unicorn",               "~>4.3"
+  gem "unicorn",               "~>4.6"
   gem "redis-activesupport",   "~>3.2"
 end

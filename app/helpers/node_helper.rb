@@ -1,7 +1,7 @@
 # encoding: UTF-8
 module NodeHelper
 
-  ContentPresenter = Struct.new(:record, :title, :meta, :tags, :image, :body, :actions, :css_class, :hidden) do
+  ContentPresenter = Struct.new(:record, :title, :meta, :tags, :notice, :image, :body, :actions, :css_class, :hidden) do
     def to_hash
       attrs = members.map(&:to_sym)
       Hash[*attrs.zip(values).flatten(1)]
@@ -57,13 +57,13 @@ module NodeHelper
 
   def paginated_nodes(nodes, link=nil)
     paginated_section(nodes, link) do
-      content_tag(:div, render(nodes.map &:content), :id => 'contents')
+      content_tag(:main, render(nodes.map &:content), :id => 'contents', :role => 'main')
     end
   end
 
   def paginated_contents(contents, link=nil)
     paginated_section(contents, link) do
-      content_tag(:div, render(contents), :id => 'contents')
+      content_tag(:main, render(contents), :id => 'contents', :role => 'main')
     end
   end
 

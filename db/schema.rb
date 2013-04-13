@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121216160203) do
+ActiveRecord::Schema.define(:version => 20130321210304) do
 
   create_table "access_grants", :force => true do |t|
     t.integer  "account_id"
@@ -63,8 +63,9 @@ ActiveRecord::Schema.define(:version => 20121216160203) do
   add_index "accounts", ["user_id"], :name => "index_accounts_on_user_id"
 
   create_table "banners", :force => true do |t|
-    t.string "title"
-    t.text   "content"
+    t.string  "title"
+    t.text    "content"
+    t.boolean "active",  :default => true
   end
 
   create_table "categories", :force => true do |t|
@@ -105,14 +106,15 @@ ActiveRecord::Schema.define(:version => 20121216160203) do
   add_index "comments", ["user_id", "state", "created_at"], :name => "index_comments_on_user_id_and_state_and_created_at"
 
   create_table "diaries", :force => true do |t|
-    t.string   "title",          :limit => 160, :null => false
-    t.string   "cached_slug",    :limit => 165
+    t.string   "title",             :limit => 160, :null => false
+    t.string   "cached_slug",       :limit => 165
     t.integer  "owner_id"
     t.text     "body"
     t.text     "wiki_body"
     t.text     "truncated_body"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "converted_news_id"
   end
 
   add_index "diaries", ["cached_slug"], :name => "index_diaries_on_cached_slug"

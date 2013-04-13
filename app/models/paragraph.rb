@@ -41,8 +41,8 @@ class Paragraph < ActiveRecord::Base
     end
 
     until str.empty?
-      left, sep, str = str.partition(/(\r?\n){2}/)
-      left.sub!(/\A(\r?\n)+/, '')
+      left, sep, str = str.partition(/\r?\n\s{0,3}\r?\n/)
+      left.sub!(/\A(\s{0,3}\r?\n)+/, '')
       codemap.each { |id,code| left.gsub!(id, code) }
       parts << left + sep
     end
@@ -79,7 +79,8 @@ class Paragraph < ActiveRecord::Base
 ### Behaviour ###
 
   def update_by(user)
-    news.editor = user.account
+    n = news
+    n.editor = user.account
     if wiki_body.blank?
       destroy
     else
@@ -87,8 +88,8 @@ class Paragraph < ActiveRecord::Base
       $redis.del lock_key
       save
     end
-    news.body_will_change!
-    news.save
+    n.body_will_change!
+    n.save
   end
 
 ### Wikify ###

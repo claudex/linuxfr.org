@@ -136,8 +136,9 @@ LinuxfrOrg::Application.routes.draw do
         post :accept
         post :refuse
         post :rewrite
-        post :ppp
+        post :reassign
         post :reset
+        post :ppp
         get :vote
       end
     end
@@ -168,6 +169,8 @@ LinuxfrOrg::Application.routes.draw do
       member do
         post :archive
         post :reopen
+        post :lower
+        post :higher
       end
     end
     resources :categories, :except => [:show]
